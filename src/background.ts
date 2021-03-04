@@ -1,9 +1,10 @@
 'use strict'
 
-import { app, protocol, BrowserWindow } from 'electron'
+import { app, protocol, BrowserWindow, Menu, shell, ipcMain } from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer'
 const isDevelopment = process.env.NODE_ENV !== 'production'
+import defaultMenu from 'electron-default-menu';
 
 // Scheme must be registered before the app is ready
 protocol.registerSchemesAsPrivileged([
@@ -16,13 +17,31 @@ async function createWindow() {
     width: 800,
     height: 600,
     webPreferences: {
-      
       // Use pluginOptions.nodeIntegration, leave this alone
       // See nklayman.github.io/vue-cli-plugin-electron-builder/guide/security.html#node-integration for more info
       nodeIntegration: (process.env
-          .ELECTRON_NODE_INTEGRATION as unknown) as boolean
+        .ELECTRON_NODE_INTEGRATION as unknown) as boolean
     }
   })
+
+  const menu = defaultMenu(app, shell);
+  const template =
+  {
+    label: 'Actions',
+    submenu: [
+      {
+        label: 'Commit',
+        click: (item, window) => {
+          win.webContents.send("commit");
+        }
+      },
+    ]
+  };
+
+  menu.splice(4, 0, template as any);
+
+
+  Menu.setApplicationMenu(Menu.buildFromTemplate(menu))
 
   if (process.env.WEBPACK_DEV_SERVER_URL) {
     // Load the url of the dev server if in development mode
@@ -50,10 +69,25 @@ app.on('activate', () => {
   if (BrowserWindow.getAllWindows().length === 0) createWindow()
 })
 
+function registerLocalResourceProtocol() {
+  protocol.registerFileProtocol('local', (request, callback) => {
+    const url = request.url.replace(/^local:\/\//, '')
+    // Decode URL to prevent errors when loading filenames with UTF-8 chars or chars like "#"
+    const decodedUrl = decodeURI(url) // Needed in case URL contains spaces
+    try {
+      return callback(decodedUrl)
+    }
+    catch (error) {
+      console.error('ERROR: registerLocalResourceProtocol: Could not get file path:', error)
+    }
+  })
+}
+
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.on('ready', async () => {
+  registerLocalResourceProtocol();
   if (isDevelopment && !process.env.IS_TEST) {
     // Install Vue Devtools
     try {

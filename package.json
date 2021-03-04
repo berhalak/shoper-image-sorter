@@ -13,12 +13,17 @@
   },
   "main": "background.js",
   "dependencies": {
+    "electron-default-menu": "^1.0.2",
     "fromit": "^2.0.5",
     "vue": "^2.6.11",
     "vue-router": "^3.2.0"
   },
   "devDependencies": {
+    "@tailwindcss/aspect-ratio": "^0.2.0",
+    "@tailwindcss/forms": "^0.2.1",
+    "@tailwindcss/line-clamp": "^0.2.0",
     "@tailwindcss/postcss7-compat": "^2.0.3",
+    "@tailwindcss/typography": "^0.4.0",
     "@types/electron-devtools-installer": "^2.2.0",
     "@types/node": "^14.14.31",
     "@vue/cli-plugin-router": "~4.5.0",
