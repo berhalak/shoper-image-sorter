@@ -2,8 +2,6 @@
 node_modules
 /dist
 
-android
-electron
 
 # local env files
 .env.local
@@ -23,3 +21,6 @@ pnpm-debug.log*
 *.njsproj
 *.sln
 *.sw?
+
+#Electron-builder output
+/dist_electron
